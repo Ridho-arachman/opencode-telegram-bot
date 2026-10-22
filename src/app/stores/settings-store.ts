@@ -184,6 +184,17 @@ export function setTtsMode(mode: TtsMode): void {
   void writeSettingsFile(currentSettings);
 }
 
+export type PermissionAutoApproveMode = "off" | "all" | "selective";
+
+export function getPermissionAutoApproveMode(): PermissionAutoApproveMode {
+  return currentSettings.permissionAutoApproveMode ?? "off";
+}
+
+export function setPermissionAutoApproveMode(mode: PermissionAutoApproveMode): void {
+  currentSettings.permissionAutoApproveMode = mode;
+  void writeSettingsFile(currentSettings);
+}
+
 export function getCompactOutputMode(): boolean {
   return currentSettings.compactOutputMode ?? false;
 }
@@ -367,6 +378,7 @@ function applyInitialSettingsPreset(preset: Record<string, unknown>): void {
     "responseStreamingMode",
     "sendDiffFileAttachments",
     "promptQueueEnabled",
+    "permissionAutoApproveMode",
   ]);
 
   for (const [key, value] of Object.entries(preset)) {

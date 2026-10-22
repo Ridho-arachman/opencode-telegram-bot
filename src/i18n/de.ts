@@ -185,6 +185,11 @@ export const de: I18nDictionary = {
   "settings.pin_session_dashboard.label": "Pin session dashboard",
   "settings.tts.label": "Audioantworten",
   "settings.prompt_queue.label": "Nachrichtenwarteschlange",
+  "settings.permission_auto_approve.label": "Auto-approve permissions",
+  "settings.permission_auto_approve.off": "Off",
+  "settings.permission_auto_approve.all": "All (always allow)",
+  "settings.permission_auto_approve.selective": "Selective (bash, read, list, glob, grep, task, webfetch, websearch)",
+
   "settings.value.on": "Ein",
   "settings.value.off": "Aus",
   "settings.prompt_queue.queue": "Queue",

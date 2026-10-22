@@ -179,6 +179,11 @@ export const tr: I18nDictionary = {
   "settings.pin_session_dashboard.label": "Oturum panosunu sabitle",
   "settings.tts.label": "Sesli yanıtlar",
   "settings.prompt_queue.label": "Mesaj kuyruğu",
+  "settings.permission_auto_approve.label": "Auto-approve permissions",
+  "settings.permission_auto_approve.off": "Off",
+  "settings.permission_auto_approve.all": "All (always allow)",
+  "settings.permission_auto_approve.selective": "Selective (bash, read, list, glob, grep, task, webfetch, websearch)",
+
   "settings.value.on": "Açık",
   "settings.value.off": "Kapalı",
   "settings.prompt_queue.queue": "Queue",

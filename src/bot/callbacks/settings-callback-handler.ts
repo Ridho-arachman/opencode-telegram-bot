@@ -4,6 +4,7 @@ import type { AppContainer } from "../../app/bootstrap/app-container.js";
 import {
   getCompactOutputMode,
   getDeleteCompactProgressOnFinish,
+  getPermissionAutoApproveMode,
   getPromptQueueMode,
   getResponseStreamingMode,
   getSendDiffFileAttachments,
@@ -13,6 +14,7 @@ import {
   getTtsMode,
   setCompactOutputMode,
   setDeleteCompactProgressOnFinish,
+  setPermissionAutoApproveMode,
   setPinnedDashboardEnabled,
   setPromptQueueMode,
   setResponseStreamingMode,
@@ -20,10 +22,12 @@ import {
   setShowAssistantRunFooter,
   setShowThinkingContent,
   setTtsMode,
+  type PermissionAutoApproveMode,
   type PromptQueueMode,
   type ResponseStreamingMode,
   type TtsMode,
 } from "../../app/stores/settings-store.js";
+import { isTtsConfigured } from "../../app/services/tts-service.js";
 import { t } from "../../i18n/index.js";
 import { opencodeServerVersion } from "../../opencode/client.js";
 import { logger } from "../../utils/logger.js";
@@ -36,6 +40,7 @@ import {
   SETTINGS_COMPACT_OUTPUT_CALLBACK,
   SETTINGS_DELETE_PROGRESS_ON_FINISH_CALLBACK,
   SETTINGS_DIFF_FILES_CALLBACK,
+  SETTINGS_PERMISSION_AUTO_APPROVE_CALLBACK,
   SETTINGS_PIN_SESSION_DASHBOARD_CALLBACK,
   SETTINGS_PROMPT_QUEUE_CALLBACK,
   SETTINGS_RESPONSE_STREAMING_CALLBACK,
@@ -62,6 +67,32 @@ function getNextTtsMode(mode: TtsMode): TtsMode {
 
   if (mode === "all") {
     return "auto";
+  }
+
+  return "off";
+}
+
+function getPermissionAutoApproveSavedMessageKey(
+  mode: PermissionAutoApproveMode,
+): "settings.permission_auto_approve.off" | "settings.permission_auto_approve.all" | "settings.permission_auto_approve.selective" {
+  if (mode === "all") {
+    return "settings.permission_auto_approve.all";
+  }
+
+  if (mode === "selective") {
+    return "settings.permission_auto_approve.selective";
+  }
+
+  return "settings.permission_auto_approve.off";
+}
+
+function getNextPermissionAutoApproveMode(mode: PermissionAutoApproveMode): PermissionAutoApproveMode {
+  if (mode === "off") {
+    return "all";
+  }
+
+  if (mode === "all") {
+    return "selective";
   }
 
   return "off";
@@ -198,9 +229,26 @@ export async function handleSettingsCallback(
     if (callbackData === SETTINGS_TTS_CALLBACK) {
       const nextMode = getNextTtsMode(getTtsMode());
 
+      if (nextMode !== "off" && !isTtsConfigured()) {
+        await ctx.answerCallbackQuery({ text: t("tts.not_configured"), show_alert: true });
+        return true;
+      }
+
       setTtsMode(nextMode);
       const { text, keyboard } = buildSettingsMenuView();
       await ctx.answerCallbackQuery({ text: t(getTtsSavedMessageKey(nextMode)) });
+      await ctx.editMessageText(text, {
+        reply_markup: appendInlineMenuCancelButton(keyboard, "settings"),
+      });
+      return true;
+    }
+
+    if (callbackData === SETTINGS_PERMISSION_AUTO_APPROVE_CALLBACK) {
+      const nextMode = getNextPermissionAutoApproveMode(getPermissionAutoApproveMode());
+
+      setPermissionAutoApproveMode(nextMode);
+      const { text, keyboard } = buildSettingsMenuView();
+      await ctx.answerCallbackQuery({ text: t(getPermissionAutoApproveSavedMessageKey(nextMode)) });
       await ctx.editMessageText(text, {
         reply_markup: appendInlineMenuCancelButton(keyboard, "settings"),
       });

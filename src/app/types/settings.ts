@@ -28,6 +28,7 @@ export interface Settings {
   sendDiffFileAttachments?: boolean | undefined;
   promptQueueEnabled?: boolean | undefined;
   promptQueueMode?: PromptQueueMode | undefined;
+  permissionAutoApproveMode?: "off" | "all" | "selective" | undefined;
   sessionDirectoryCache?: SessionDirectoryCacheInfo | undefined;
   scheduledTasks?: ScheduledTask[] | undefined;
   scheduledTaskSessionIgnores?: ScheduledTaskSessionIgnoreInfo[] | undefined;

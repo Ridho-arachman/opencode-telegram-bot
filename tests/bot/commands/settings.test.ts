@@ -20,6 +20,7 @@ import {
   SETTINGS_COMPACT_OUTPUT_CALLBACK,
   SETTINGS_DELETE_PROGRESS_ON_FINISH_CALLBACK,
   SETTINGS_DIFF_FILES_CALLBACK,
+  SETTINGS_PERMISSION_AUTO_APPROVE_CALLBACK,
   SETTINGS_PIN_SESSION_DASHBOARD_CALLBACK,
   SETTINGS_PROMPT_QUEUE_CALLBACK,
   SETTINGS_RESPONSE_STREAMING_CALLBACK,
@@ -48,6 +49,8 @@ const mocked = vi.hoisted(() => ({
   refreshSessionValuesMock: vi.fn(),
   getTtsModeMock: vi.fn(),
   setTtsModeMock: vi.fn(),
+  getPermissionAutoApproveModeMock: vi.fn(),
+  setPermissionAutoApproveModeMock: vi.fn(),
   getPromptQueueModeMock: vi.fn(),
   setPromptQueueModeMock: vi.fn(),
   isTtsConfiguredMock: vi.fn(),
@@ -81,6 +84,9 @@ vi.mock("../../../src/app/stores/settings-store.js", () => ({
   setPinnedDashboardEnabled: mocked.setPinnedDashboardEnabledMock,
   getTtsMode: mocked.getTtsModeMock,
   setTtsMode: mocked.setTtsModeMock,
+  isTtsConfigured: mocked.isTtsConfiguredMock,
+  getPermissionAutoApproveMode: mocked.getPermissionAutoApproveModeMock,
+  setPermissionAutoApproveMode: mocked.setPermissionAutoApproveModeMock,
   getPromptQueueMode: mocked.getPromptQueueModeMock,
   setPromptQueueMode: mocked.setPromptQueueModeMock,
 }));
@@ -174,9 +180,12 @@ describe("bot/commands/settings-command", () => {
       `${t("settings.tts.label")}: ${t("status.tts.auto")}`,
     );
     expect(opts.reply_markup.inline_keyboard[6][0].text).toBe(
+      `${t("settings.permission_auto_approve.label")}: ${t("settings.permission_auto_approve.off")}`,
+    );
+    expect(opts.reply_markup.inline_keyboard[7][0].text).toBe(
       `${t("settings.prompt_queue.label")}: ${t("settings.value.off")}`,
     );
-    expect(opts.reply_markup.inline_keyboard[7][0].text).toBe(t("inline.button.close"));
+    expect(opts.reply_markup.inline_keyboard[8][0].text).toBe(t("inline.button.close"));
   });
 
   it("shows thinking content setting when compact output is disabled", async () => {
@@ -214,6 +223,9 @@ describe("bot/commands/settings-command", () => {
       `${t("settings.tts.label")}: ${t("status.tts.off")}`,
     );
     expect(opts.reply_markup.inline_keyboard[7][0].text).toBe(
+      `${t("settings.permission_auto_approve.label")}: ${t("settings.permission_auto_approve.off")}`,
+    );
+    expect(opts.reply_markup.inline_keyboard[8][0].text).toBe(
       `${t("settings.prompt_queue.label")}: ${t("settings.value.off")}`,
     );
   });
@@ -448,7 +460,7 @@ describe("bot/callbacks/settings-callback-handler", () => {
     const call = defined(vi.mocked(ctx.editMessageText).mock.calls[0]);
     const [text, opts] = call;
     expect(text).toBe(t("settings.menu.title"));
-    expect(defined(opts?.reply_markup?.inline_keyboard[7]?.[0]).text).toBe(
+    expect(defined(opts?.reply_markup?.inline_keyboard[8]?.[0]).text).toBe(
       `${t("settings.prompt_queue.label")}: ${t("settings.value.on")}`,
     );
   });
@@ -556,6 +568,75 @@ describe("bot/callbacks/settings-callback-handler", () => {
     expect(mocked.setTtsModeMock).toHaveBeenCalledWith("off");
     expect(ctx.answerCallbackQuery).toHaveBeenCalledWith({ text: t("tts.off") });
     expect(ctx.editMessageText).toHaveBeenCalledTimes(1);
+  });
+
+  it("cycles permission auto-approve mode off → all", async () => {
+    mocked.getCompactOutputModeMock.mockReturnValue(false);
+    mocked.getShowThinkingContentMock.mockReturnValue(true);
+    mocked.getTtsModeMock.mockReturnValue("off");
+    mocked.getPermissionAutoApproveModeMock.mockReturnValueOnce("off").mockReturnValueOnce("all");
+    activateSettingsMenu();
+    const ctx = createCallbackContext(SETTINGS_PERMISSION_AUTO_APPROVE_CALLBACK);
+
+    const result = await handleSettingsCallback(ctx, createDeps());
+
+    expect(result).toBe(true);
+    expect(mocked.setPermissionAutoApproveModeMock).toHaveBeenCalledWith("all");
+    expect(ctx.answerCallbackQuery).toHaveBeenCalledWith({
+      text: t("settings.permission_auto_approve.all"),
+    });
+    const call = defined(vi.mocked(ctx.editMessageText).mock.calls[0]);
+    const [text, opts] = call;
+    expect(text).toBe(t("settings.menu.title"));
+    expect(defined(opts?.reply_markup?.inline_keyboard[7]?.[0]).text).toBe(
+      `${t("settings.permission_auto_approve.label")}: ${t("settings.permission_auto_approve.all")}`,
+    );
+  });
+
+  it("cycles permission auto-approve mode all → selective", async () => {
+    mocked.getCompactOutputModeMock.mockReturnValue(false);
+    mocked.getShowThinkingContentMock.mockReturnValue(true);
+    mocked.getTtsModeMock.mockReturnValue("off");
+    mocked.getPermissionAutoApproveModeMock.mockReturnValueOnce("all").mockReturnValueOnce("selective");
+    activateSettingsMenu();
+    const ctx = createCallbackContext(SETTINGS_PERMISSION_AUTO_APPROVE_CALLBACK);
+
+    const result = await handleSettingsCallback(ctx, createDeps());
+
+    expect(result).toBe(true);
+    expect(mocked.setPermissionAutoApproveModeMock).toHaveBeenCalledWith("selective");
+    expect(ctx.answerCallbackQuery).toHaveBeenCalledWith({
+      text: t("settings.permission_auto_approve.selective"),
+    });
+    const call = defined(vi.mocked(ctx.editMessageText).mock.calls[0]);
+    const [text, opts] = call;
+    expect(text).toBe(t("settings.menu.title"));
+    expect(defined(opts?.reply_markup?.inline_keyboard[7]?.[0]).text).toBe(
+      `${t("settings.permission_auto_approve.label")}: ${t("settings.permission_auto_approve.selective")}`,
+    );
+  });
+
+  it("cycles permission auto-approve mode selective → off", async () => {
+    mocked.getCompactOutputModeMock.mockReturnValue(false);
+    mocked.getShowThinkingContentMock.mockReturnValue(true);
+    mocked.getTtsModeMock.mockReturnValue("off");
+    mocked.getPermissionAutoApproveModeMock.mockReturnValueOnce("selective").mockReturnValueOnce("off");
+    activateSettingsMenu();
+    const ctx = createCallbackContext(SETTINGS_PERMISSION_AUTO_APPROVE_CALLBACK);
+
+    const result = await handleSettingsCallback(ctx, createDeps());
+
+    expect(result).toBe(true);
+    expect(mocked.setPermissionAutoApproveModeMock).toHaveBeenCalledWith("off");
+    expect(ctx.answerCallbackQuery).toHaveBeenCalledWith({
+      text: t("settings.permission_auto_approve.off"),
+    });
+    const call = defined(vi.mocked(ctx.editMessageText).mock.calls[0]);
+    const [text, opts] = call;
+    expect(text).toBe(t("settings.menu.title"));
+    expect(defined(opts?.reply_markup?.inline_keyboard[7]?.[0]).text).toBe(
+      `${t("settings.permission_auto_approve.label")}: ${t("settings.permission_auto_approve.off")}`,
+    );
   });
 
   it("toggles pin session dashboard and applies it immediately", async () => {

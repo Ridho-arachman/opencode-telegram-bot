@@ -165,6 +165,11 @@ export const zh: I18nDictionary = {
   "settings.pin_session_dashboard.label": "Pin session dashboard",
   "settings.tts.label": "语音回复",
   "settings.prompt_queue.label": "消息队列",
+  "settings.permission_auto_approve.label": "Auto-approve permissions",
+  "settings.permission_auto_approve.off": "Off",
+  "settings.permission_auto_approve.all": "All (always allow)",
+  "settings.permission_auto_approve.selective": "Selective (bash, read, list, glob, grep, task, webfetch, websearch)",
+
   "settings.value.on": "开启",
   "settings.value.off": "关闭",
   "settings.prompt_queue.queue": "Queue",

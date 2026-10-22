@@ -1,6 +1,8 @@
-import { getDeleteCompactProgressOnFinish } from "../../../app/stores/settings-store.js";
+import { getCurrentProject, getDeleteCompactProgressOnFinish, getPermissionAutoApproveMode } from "../../../app/stores/settings-store.js";
+import { opencodeClient } from "../../../opencode/client.js";
 import { logger } from "../../../utils/logger.js";
-import type { PermissionRequest } from "../../../app/types/permission.js";
+import { safeBackgroundTask } from "../../../utils/safe-background-task.js";
+import type { PermissionReply, PermissionRequest } from "../../../app/types/permission.js";
 import type { Question } from "../../../app/types/question.js";
 import {
   closeDroppedPoll,
@@ -186,6 +188,50 @@ async function presentPermission(
   if (permissionManager.getDropReason(request, generation)) {
     logger.debug(`[Bot] Dropping stale or resolved permission request: requestID=${request.id}`);
     return;
+  }
+
+  // Check auto-approve permissions setting
+  const autoApproveMode = getPermissionAutoApproveMode();
+  if (autoApproveMode !== "off") {
+    const permissionType = request.permission;
+    // Selective mode: only auto-approve safe/read-only permissions
+    const selectivePermissions = new Set([
+      "bash",
+      "read",
+      "list",
+      "glob",
+      "grep",
+      "task",
+      "webfetch",
+      "websearch",
+      "lsp",
+    ]);
+    const shouldAutoApprove =
+      autoApproveMode === "all" || (autoApproveMode === "selective" && selectivePermissions.has(permissionType));
+
+    if (shouldAutoApprove) {
+      const directory = getCurrentProject()?.worktree ?? "";
+      if (directory) {
+        logger.info(`[Permission] Auto-approving (${autoApproveMode}): type=${permissionType}, requestID=${request.id}`);
+        const reply: PermissionReply = "always";
+        safeBackgroundTask({
+          taskName: "permission.auto_approve",
+          task: async () => {
+            const response = await opencodeClient.permission.reply({
+              requestID: request.id,
+              directory,
+              reply,
+            });
+            if (response.error) {
+              logger.error(`[Permission] Auto-approve failed: requestID=${request.id}`, response.error);
+            }
+          },
+        });
+        // Mark the permission as handled so it doesn't show in UI
+        permissionManager.settleRequest(request.id, "always", false);
+        return;
+      }
+    }
   }
 
   if (interactionManager.getSnapshot()?.kind === "question") {

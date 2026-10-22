@@ -2,6 +2,7 @@ import { InlineKeyboard } from "grammy";
 import {
   getCompactOutputMode,
   getDeleteCompactProgressOnFinish,
+  getPermissionAutoApproveMode,
   getPromptQueueMode,
   getResponseStreamingMode,
   getSendDiffFileAttachments,
@@ -9,6 +10,7 @@ import {
   getShowAssistantRunFooter,
   getShowThinkingContent,
   getTtsMode,
+  type PermissionAutoApproveMode,
   type PromptQueueMode,
   type ResponseStreamingMode,
   type TtsMode,
@@ -25,6 +27,7 @@ export const SETTINGS_DIFF_FILES_CALLBACK = `${SETTINGS_CALLBACK_PREFIX}diff_fil
 export const SETTINGS_ASSISTANT_FOOTER_CALLBACK = `${SETTINGS_CALLBACK_PREFIX}assistant_footer`;
 export const SETTINGS_PIN_SESSION_DASHBOARD_CALLBACK = `${SETTINGS_CALLBACK_PREFIX}pin_session_dashboard`;
 export const SETTINGS_TTS_CALLBACK = `${SETTINGS_CALLBACK_PREFIX}tts`;
+export const SETTINGS_PERMISSION_AUTO_APPROVE_CALLBACK = `${SETTINGS_CALLBACK_PREFIX}permission_auto_approve`;
 export const SETTINGS_PROMPT_QUEUE_CALLBACK = `${SETTINGS_CALLBACK_PREFIX}prompt_queue`;
 
 export function formatBooleanSettingValue(enabled: boolean): string {
@@ -60,6 +63,20 @@ export function formatPromptQueueModeValue(mode: PromptQueueMode): string {
   return t("settings.value.off");
 }
 
+export function formatPermissionAutoApproveModeValue(
+  mode: PermissionAutoApproveMode,
+): string {
+  if (mode === "all") {
+    return t("settings.permission_auto_approve.all");
+  }
+
+  if (mode === "selective") {
+    return t("settings.permission_auto_approve.selective");
+  }
+
+  return t("settings.permission_auto_approve.off");
+}
+
 export function formatResponseStreamingModeValue(mode: ResponseStreamingMode): string {
   return mode === "draft"
     ? t("settings.response_streaming.draft")
@@ -75,6 +92,7 @@ export function buildSettingsMenuView(): { text: string; keyboard: InlineKeyboar
   const showAssistantRunFooter = getShowAssistantRunFooter();
   const pinnedDashboardEnabled = getPinnedDashboardEnabled();
   const ttsMode = getTtsMode();
+  const permissionAutoApproveMode = getPermissionAutoApproveMode();
   const promptQueueMode = getPromptQueueMode();
   const keyboard = new InlineKeyboard()
     .text(
@@ -117,6 +135,11 @@ export function buildSettingsMenuView(): { text: string; keyboard: InlineKeyboar
     )
     .row()
     .text(`${t("settings.tts.label")}: ${formatTtsModeValue(ttsMode)}`, SETTINGS_TTS_CALLBACK)
+    .row()
+    .text(
+      `${t("settings.permission_auto_approve.label")}: ${formatPermissionAutoApproveModeValue(permissionAutoApproveMode)}`,
+      SETTINGS_PERMISSION_AUTO_APPROVE_CALLBACK,
+    )
     .row()
     .text(
       `${t("settings.prompt_queue.label")}: ${formatPromptQueueModeValue(promptQueueMode)}`,

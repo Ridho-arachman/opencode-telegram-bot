@@ -185,6 +185,11 @@ export const ko: I18nDictionary = {
   "settings.pin_session_dashboard.label": "Pin session dashboard",
   "settings.tts.label": "음성 답변",
   "settings.prompt_queue.label": "메시지 대기열",
+  "settings.permission_auto_approve.label": "Auto-approve permissions",
+  "settings.permission_auto_approve.off": "Off",
+  "settings.permission_auto_approve.all": "All (always allow)",
+  "settings.permission_auto_approve.selective": "Selective (bash, read, list, glob, grep, task, webfetch, websearch)",
+
   "settings.value.on": "켜기",
   "settings.value.off": "끄기",
   "settings.prompt_queue.queue": "Queue",

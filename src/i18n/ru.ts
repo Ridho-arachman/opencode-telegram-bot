@@ -176,6 +176,11 @@ export const ru: I18nDictionary = {
   "settings.pin_session_dashboard.label": "Закреплять дашборд сессии",
   "settings.tts.label": "Аудиоответы",
   "settings.prompt_queue.label": "Очередь сообщений",
+  "settings.permission_auto_approve.label": "Auto-approve permissions",
+  "settings.permission_auto_approve.off": "Off",
+  "settings.permission_auto_approve.all": "All (always allow)",
+  "settings.permission_auto_approve.selective": "Selective (bash, read, list, glob, grep, task, webfetch, websearch)",
+
   "settings.value.on": "Вкл",
   "settings.value.off": "Выкл",
   "settings.prompt_queue.queue": "Очередь",

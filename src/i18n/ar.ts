@@ -178,6 +178,11 @@ export const ar: I18nDictionary = {
   "settings.pin_session_dashboard.label": "Pin session dashboard",
   "settings.tts.label": "الردود الصوتية",
   "settings.prompt_queue.label": "قائمة انتظار الرسائل",
+  "settings.permission_auto_approve.label": "Auto-approve permissions",
+  "settings.permission_auto_approve.off": "Off",
+  "settings.permission_auto_approve.all": "All (always allow)",
+  "settings.permission_auto_approve.selective": "Selective (bash, read, list, glob, grep, task, webfetch, websearch)",
+
   "settings.value.on": "مفعّل",
   "settings.value.off": "معطّل",
   "settings.prompt_queue.queue": "Queue",
