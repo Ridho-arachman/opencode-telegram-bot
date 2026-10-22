@@ -76,6 +76,42 @@ const INDONESIAN_MARKERS = new Set([
   "dl",
   "bnr",
   "btl",
+  // Formal Indonesian markers common in AI assistant responses
+  "telah",
+  "tersebut",
+  "berikut",
+  "silakan",
+  "apakah",
+  "sebagai",
+  "ketika",
+  "sebelum",
+  "sesudah",
+  "melakukan",
+  "menggunakan",
+  "selesai",
+  "proses",
+  "fungsi",
+  "parameter",
+  "variabel",
+  "konfigurasi",
+  "file",
+  "direktori",
+  "pengaturan",
+  "masalah",
+  "solusi",
+  "perbaikan",
+  "perubahan",
+  "hasil",
+  "output",
+  "error",
+  "berhasil",
+  "gagal",
+  "coba",
+  "cek",
+  "lihat",
+  "oke",
+  "ok",
+  "sip",
 ]);
 
 /** Informal Indonesian pronouns that never appear in English text. */
@@ -84,14 +120,10 @@ const INDONESIAN_PRONOUN_PATTERN = /\b(aku|gue|gua|gw|lu|loe|lo)\b/i;
 /**
  * Guesses whether a reply is Indonesian or English from a short word sample.
  *
- * This is a heuristic, not a language model. It scores only positive evidence
- * for Indonesian (known markers and informal pronouns) and compares that
- * against the number of sampled words, rather than treating every unknown word
- * as English — otherwise ordinary Indonesian content words would cancel out
- * the markers and an Indonesian sentence would score as English.
- *
- * A reply defaults to Indonesian only when markers are a meaningful share of
- * the sample; short or marker-free text falls back to English.
+ * This is a heuristic, not a language model. It scores positive evidence
+ * for Indonesian (known markers and informal pronouns). A reply defaults
+ * to Indonesian when at least two markers are found in the first 50 words;
+ * otherwise falls back to English.
  */
 export function detectEdgeLanguage(text: string): "id" | "en" {
   const sample = text.toLowerCase().split(/\s+/).slice(0, 50);
@@ -108,9 +140,8 @@ export function detectEdgeLanguage(text: string): "id" | "en" {
     indonesian += 5;
   }
 
-  // Require markers on at least a third of the sampled words (and at least
-  // two) so a single coincidental word cannot flip an English reply.
-  return indonesian >= 2 && indonesian * 3 >= sample.length ? "id" : "en";
+  // At least 2 Indonesian markers in the first 50 words (or 1 pronoun match)
+  return indonesian >= 2 ? "id" : "en";
 }
 
 /** Per-language Edge voices used when TTS_VOICE is not set explicitly. */
