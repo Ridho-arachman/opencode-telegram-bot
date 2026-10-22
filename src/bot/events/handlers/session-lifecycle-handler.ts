@@ -13,6 +13,8 @@ import {
   type EventHandlerDeps,
 } from "./handler-context.js";
 import { closeForegroundRun } from "./run-close.js";
+import { sendTtsResponseForSession } from "../../handlers/tts-response-handler.js";
+import { takePendingTtsText, pendingTtsText } from "./assistant-response-handler.js";
 
 const SESSION_RETRY_PREFIX = "🔁";
 
@@ -82,12 +84,14 @@ export function registerSessionLifecycleHandlers(deps: SessionLifecycleDeps): vo
     const destination = policy.getDestination(sessionId);
     if (!destination) {
       runtime.compactProgressStreamer.clearSession(sessionId, "session_idle");
+      pendingTtsText.delete(sessionId); // Cleanup pending TTS text
       deps.foregroundSessionState.markIdle(sessionId);
       return;
     }
 
     if (!policy.isForegroundSession(sessionId)) {
       runtime.compactProgressStreamer.clearSession(sessionId, "session_idle");
+      pendingTtsText.delete(sessionId); // Cleanup pending TTS text
       deps.foregroundSessionState.markIdle(sessionId);
       await deps.scheduledTaskRuntime.flushDeferredDeliveries();
       return;
@@ -95,6 +99,17 @@ export function registerSessionLifecycleHandlers(deps: SessionLifecycleDeps): vo
 
     try {
       await closeForegroundRun(deps, sessionId, destination, completedRun, "session_idle");
+      
+      // Send TTS for the last assistant message (if any) after the task completes
+      const pendingText = takePendingTtsText(sessionId);
+      if (pendingText) {
+        await sendTtsResponseForSession({
+          api: destination.api,
+          sessionId,
+          chatId: destination.chatId,
+          text: pendingText,
+        });
+      }
     } catch (err) {
       logger.error("[Bot] Failed to send session idle footer:", err);
     } finally {
@@ -122,6 +137,7 @@ export function registerSessionLifecycleHandlers(deps: SessionLifecycleDeps): vo
       runtime.compactProgressStreamer.clearSession(sessionId, "session_error_no_bot_context");
       deps.assistantRunState.clearRun(sessionId, "session_error_no_bot_context");
       deps.foregroundSessionState.markIdle(sessionId);
+      pendingTtsText.delete(sessionId); // Cleanup pending TTS text
       return;
     }
 
@@ -133,6 +149,7 @@ export function registerSessionLifecycleHandlers(deps: SessionLifecycleDeps): vo
       deps.assistantRunState.clearRun(sessionId, "session_error_not_current");
       deps.foregroundSessionState.markIdle(sessionId);
       await deps.scheduledTaskRuntime.flushDeferredDeliveries();
+      pendingTtsText.delete(sessionId); // Cleanup pending TTS text
       return;
     }
 
@@ -165,6 +182,7 @@ export function registerSessionLifecycleHandlers(deps: SessionLifecycleDeps): vo
 
     deps.foregroundSessionState.markIdle(sessionId);
     await deps.scheduledTaskRuntime.flushDeferredDeliveries();
+    pendingTtsText.delete(sessionId); // Cleanup pending TTS text
     void dispatchNextQueuedPrompt();
   });
 

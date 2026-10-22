@@ -12,7 +12,7 @@ import { getCurrentSession } from "../../../app/services/session-service.js";
 import { sendBotText } from "../../messages/telegram-text.js";
 import { closeForegroundRun } from "./run-close.js";
 import { finalizeAssistantResponse } from "../../streaming/finalize-assistant-response.js";
-import { sendTtsResponseForSession } from "../../handlers/tts-response-handler.js";
+
 import { deliverThinkingMessage } from "../../messages/thinking-message.js";
 import {
   prepareAssistantFinalStreamingPayload,
@@ -31,6 +31,15 @@ import {
   type EventHandlerBase,
   type EventHandlerDeps,
 } from "./handler-context.js";
+
+// Store the last assistant message text per session for TTS at session idle
+export const pendingTtsText = new Map<string, string>();
+
+export function takePendingTtsText(sessionId: string): string | null {
+  const text = pendingTtsText.get(sessionId);
+  pendingTtsText.delete(sessionId);
+  return text ?? null;
+}
 
 type KeepAssistantDraftsDeps = EventHandlerDeps<"keyboardManager">;
 
@@ -456,12 +465,8 @@ export function registerAssistantResponseHandlers(deps: AssistantResponseDeps): 
           runtime.compactProgressStreamer.releaseHold(sessionId);
         }
 
-        await sendTtsResponseForSession({
-          api: destination.api,
-          sessionId,
-          chatId: destination.chatId,
-          text: messageText,
-        });
+        // Store the final assistant message for TTS at session idle (only last message)
+        pendingTtsText.set(sessionId, messageText);
       } catch (err) {
         dropSessionOutput("assistant_finalize_failed");
         logger.error("Failed to send message to Telegram:", err);
