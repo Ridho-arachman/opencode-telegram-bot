@@ -642,6 +642,12 @@ export const ar: I18nDictionary = {
   "stt.recognized": "🎤 النص المستخرج من الرسالة الصوتية:",
   "stt.not_configured":
     "🎤 ميزة تحويل الصوت إلى نص غير مهيأة بعد.\n\nاضبط STT_API_URL وSTT_API_KEY داخل ملف .env لتفعيلها.",
+  "stt.not_configured.api":
+    "🎤 Voice recognition is not configured.\n\nاضبط STT_API_URL وSTT_API_KEY داخل ملف .env لتفعيلها.",
+  "stt.not_configured.vosk":
+    "🎤 ميزة تحويل الصوت إلى نص عبر Vosk غير مهيأة بعد.\n\nنزّل نموذجًا من https://alphacephei.com/vosk/models، ثم فك الضغط عنه واضبط VOSK_MODEL_PATH داخل ملف .env.",
+  "stt.not_configured.whisper":
+    "🎤 Whisper المحلي غير متاح.\n\nشغّل: npm install @huggingface/transformers\n\nيتم تنزيل النموذج مرة واحدة عند أول استخدام، ثم يعمل دون اتصال بالإنترنت.",
   "stt.error": "🔴 تعذر تحويل الصوت إلى نص: {error}",
   "stt.empty_result": "🎤 لم يتم التقاط كلام واضح في الرسالة الصوتية.",
 

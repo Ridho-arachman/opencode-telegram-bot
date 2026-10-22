@@ -613,6 +613,12 @@ export const zh: I18nDictionary = {
   "stt.recognized": "🎤 识别结果：",
   "stt.not_configured":
     "🎤 语音识别尚未配置。\n\n在 .env 中设置 STT_API_URL 和 STT_API_KEY 以启用。",
+  "stt.not_configured.api":
+    "🎤 Voice recognition is not configured.\n\n在 .env 中设置 STT_API_URL 和 STT_API_KEY 以启用。",
+  "stt.not_configured.vosk":
+    "🎤 Vosk 语音识别尚未配置。\n\n从 https://alphacephei.com/vosk/models 下载模型并解压，然后在 .env 中设置 VOSK_MODEL_PATH。",
+  "stt.not_configured.whisper":
+    "🎤 本地 Whisper 不可用。\n\n请运行：npm install @huggingface/transformers\n\n模型会在首次使用时下载一次，之后完全离线运行。",
   "stt.error": "🔴 识别音频失败：{error}",
   "stt.empty_result": "🎤 音频消息中未检测到语音。",
 

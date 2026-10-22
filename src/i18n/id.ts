@@ -660,6 +660,12 @@ export const id: I18nDictionary = {
   "stt.recognized": "🎤 Terdeteksi:",
   "stt.not_configured":
     "🎤 Pengenalan suara belum dikonfigurasi.\n\nAtur STT_API_URL dan STT_API_KEY di .env untuk mengaktifkannya.",
+  "stt.not_configured.api":
+    "🎤 Voice recognition is not configured.\n\nAtur STT_API_URL dan STT_API_KEY di .env untuk mengaktifkannya.",
+  "stt.not_configured.vosk":
+    "🎤 Pengenalan suara Vosk belum dikonfigurasi.\n\nUnduh model dari https://alphacephei.com/vosk/models, ekstrak, lalu atur VOSK_MODEL_PATH di .env.",
+  "stt.not_configured.whisper":
+    "🎤 Whisper lokal belum tersedia.\n\nJalankan: npm install @huggingface/transformers\n\nModel diunduh sekali saat pertama dipakai, lalu berjalan sepenuhnya offline.",
   "stt.error": "🔴 Gagal mengenali audio: {error}",
   "stt.empty_result": "🎤 Tidak ada suara yang terdeteksi di pesan audio.",
 

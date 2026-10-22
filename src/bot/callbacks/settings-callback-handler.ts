@@ -1,6 +1,6 @@
 import type { Context } from "grammy";
 import type { AppContainer } from "../../app/bootstrap/app-container.js";
-import { isTtsConfigured } from "../../app/services/tts-service.js";
+
 import {
   getCompactOutputMode,
   getDeleteCompactProgressOnFinish,
@@ -197,11 +197,6 @@ export async function handleSettingsCallback(
 
     if (callbackData === SETTINGS_TTS_CALLBACK) {
       const nextMode = getNextTtsMode(getTtsMode());
-
-      if (nextMode !== "off" && !isTtsConfigured()) {
-        await ctx.answerCallbackQuery({ text: t("tts.not_configured"), show_alert: true });
-        return true;
-      }
 
       setTtsMode(nextMode);
       const { text, keyboard } = buildSettingsMenuView();

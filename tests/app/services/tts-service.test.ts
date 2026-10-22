@@ -37,6 +37,7 @@ const mockTts = vi.hoisted(() => ({
   provider: "openai" as string,
   model: "gpt-4o-mini-tts",
   voice: "alloy",
+  voiceIsExplicit: false,
 }));
 
 vi.mock("../../../src/config.js", () => ({
@@ -456,6 +457,7 @@ describe("synthesizeSpeech (Edge)", () => {
   beforeEach(() => {
     mockTts.provider = "edge";
     mockTts.voice = "en-US-EmmaMultilingualNeural";
+    mockTts.voiceIsExplicit = false;
     mockTts.apiUrl = "";
     mockTts.apiKey = "";
     mockEdgeSynth.mockReset();
@@ -472,11 +474,32 @@ describe("synthesizeSpeech (Edge)", () => {
     const [text, options] = call;
     // Markdown is stripped before being passed to the provider.
     expect(text).toBe("Hello bold world");
-    expect(options.voice).toBe("en-US-EmmaMultilingualNeural");
+    // TTS_VOICE is unset, so the voice is picked from the detected language.
+    expect(options.voice).toBe("en-GB-RyanNeural");
 
     expect(result.filename).toBe("assistant-reply.mp3");
     expect(result.mimeType).toBe("audio/mpeg");
     expect(result.buffer).toEqual(Buffer.from([1, 2, 3, 4]));
+  });
+
+  it("keeps an explicitly configured TTS_VOICE regardless of detected language", async () => {
+    mockTts.voice = "en-US-EmmaMultilingualNeural";
+    mockTts.voiceIsExplicit = true;
+    mockEdgeSynth.mockResolvedValue(Buffer.from([1, 2, 3, 4]));
+
+    await synthesizeSpeech("Halo, apa kabar?");
+
+    const call = defined(mockEdgeSynth.mock.calls[0]);
+    expect(call[1].voice).toBe("en-US-EmmaMultilingualNeural");
+  });
+
+  it("picks the Indonesian Edge voice for Indonesian text when TTS_VOICE is unset", async () => {
+    mockEdgeSynth.mockResolvedValue(Buffer.from([1, 2, 3, 4]));
+
+    await synthesizeSpeech("Halo, apa kabar hari ini?");
+
+    const call = defined(mockEdgeSynth.mock.calls[0]);
+    expect(call[1].voice).toBe("id-ID-ArdiNeural");
   });
 
   it("throws when Edge returns an empty audio buffer", async () => {

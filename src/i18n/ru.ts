@@ -669,6 +669,12 @@ export const ru: I18nDictionary = {
   "stt.recognized": "🎤 Распознано:",
   "stt.not_configured":
     "🎤 Распознавание голоса не настроено.\n\nУстановите STT_API_URL и STT_API_KEY в .env для включения.",
+  "stt.not_configured.api":
+    "🎤 Voice recognition is not configured.\n\nУстановите STT_API_URL и STT_API_KEY в .env для включения.",
+  "stt.not_configured.vosk":
+    "🎤 Распознавание голоса через Vosk не настроено.\n\nЗагрузите модель с https://alphacephei.com/vosk/models, распакуйте её и укажите VOSK_MODEL_PATH в .env.",
+  "stt.not_configured.whisper":
+    "🎤 Локальный Whisper недоступен.\n\nВыполните: npm install @huggingface/transformers\n\nМодель загружается один раз при первом использовании и далее работает полностью офлайн.",
   "stt.error": "🔴 Не удалось распознать аудио: {error}",
   "stt.empty_result": "🎤 В аудиосообщении не обнаружена речь.",
 

@@ -11,6 +11,14 @@ import {
   transcribeAudio,
   type SttResult,
 } from "../../app/services/stt-service.js";
+import {
+  isVoskSttConfigured,
+  transcribeAudioVosk,
+} from "../../app/services/local-vosk-stt-service.js";
+import {
+  isWhisperSttConfigured,
+  transcribeAudioWhisper,
+} from "../../app/services/local-whisper-stt-service.js";
 import { processUserPrompt, type ProcessPromptDeps } from "./prompt.js";
 import { createIncomingPrompt, type IncomingPrompt } from "../../app/types/prompt.js";
 import { flushPendingPrompt } from "./message-merger.js";
@@ -158,6 +166,29 @@ async function downloadTelegramFile(
 }
 
 /**
+ * Resolves the transcription backend selected by `STT_PROVIDER`.
+ *
+ * The "api" provider is the default remote Whisper-compatible endpoint. The
+ * "vosk" and "whisper" providers run entirely on this machine: Vosk needs an
+ * extracted model directory, while transformers.js downloads the Whisper model
+ * once and then works offline.
+ */
+function resolveSttBackend(): {
+  isConfigured: () => boolean;
+  transcribe: (audioBuffer: Buffer, filename: string) => Promise<SttResult>;
+} {
+  if (config.stt.provider === "vosk") {
+    return { isConfigured: isVoskSttConfigured, transcribe: transcribeAudioVosk };
+  }
+
+  if (config.stt.provider === "whisper") {
+    return { isConfigured: isWhisperSttConfigured, transcribe: transcribeAudioWhisper };
+  }
+
+  return { isConfigured: isSttConfigured, transcribe: transcribeAudio };
+}
+
+/**
  * Creates the voice message handler function.
  *
  * The factory pattern is used so that `bot` and `ensureEventSubscription` dependencies
@@ -179,9 +210,10 @@ export function createVoiceHandler(deps: VoiceMessageDeps) {
  * 6. Passes text to processUserPrompt
  */
 export async function handleVoiceMessage(ctx: Context, deps: VoiceMessageDeps): Promise<void> {
-  const sttConfigured = deps.isSttConfigured ?? isSttConfigured;
+  const backend = resolveSttBackend();
+  const sttConfigured = deps.isSttConfigured ?? backend.isConfigured;
   const downloadFile = deps.downloadTelegramFile ?? downloadTelegramFile;
-  const transcribe = deps.transcribeAudio ?? transcribeAudio;
+  const transcribe = deps.transcribeAudio ?? backend.transcribe;
   const processPrompt = deps.processPrompt ?? processUserPrompt;
 
   // Determine file_id from voice or audio message
@@ -199,7 +231,7 @@ export async function handleVoiceMessage(ctx: Context, deps: VoiceMessageDeps): 
 
   // Check if STT is configured
   if (!sttConfigured()) {
-    await ctx.reply(t("stt.not_configured"));
+    await ctx.reply(t(`stt.not_configured.${config.stt.provider}`));
     return;
   }
 

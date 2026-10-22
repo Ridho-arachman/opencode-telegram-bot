@@ -8,8 +8,16 @@ const runtimePaths = getRuntimePaths();
 dotenv.config({ path: runtimePaths.envFilePath, quiet: true });
 
 export type MessageFormatMode = "raw" | "markdown";
-export type TtsProvider = "openai" | "google" | "elevenlabs" | "edge";
+export type TtsProvider = "openai" | "google" | "elevenlabs" | "edge" | "local";
 export type SttRequestFormat = "multipart" | "json";
+
+/**
+ * Speech-to-text backend:
+ * - "api"    = remote Whisper-compatible API (STT_API_URL / STT_API_KEY)
+ * - "vosk"   = fully offline Vosk model (VOSK_MODEL_PATH)
+ * - "whisper" = local Whisper via transformers.js (WHISPER_MODEL)
+ */
+export type SttProvider = "api" | "vosk" | "whisper";
 
 function getEnvVar(key: string, required: boolean = true): string {
   const value = process.env[key];
@@ -127,21 +135,17 @@ export function parseInitialSettingsPreset(): Record<string, unknown> {
   try {
     parsed = JSON.parse(raw);
   } catch {
-    throw new Error(
-      "INITIAL_SETTINGS_PRESET contains invalid JSON. Fix or unset the variable.",
-    );
+    throw new Error("INITIAL_SETTINGS_PRESET contains invalid JSON. Fix or unset the variable.");
   }
   if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-    throw new Error(
-      "INITIAL_SETTINGS_PRESET must be a JSON object.",
-    );
+    throw new Error("INITIAL_SETTINGS_PRESET must be a JSON object.");
   }
   return parsed as Record<string, unknown>;
 }
 
-const VALID_TTS_PROVIDERS: TtsProvider[] = ["openai", "google", "elevenlabs", "edge"];
+const VALID_TTS_PROVIDERS: TtsProvider[] = ["openai", "google", "elevenlabs", "edge", "local"];
 
-function getOptionalTtsProviderEnvVar(key: string, defaultValue: TtsProvider): TtsProvider {
+function getOptionalTtsProviderEnvVar(key: string, defaultValue: TtsProvider): TtsProvider | null {
   const value = getEnvVar(key, false);
 
   if (!value) {
@@ -149,6 +153,9 @@ function getOptionalTtsProviderEnvVar(key: string, defaultValue: TtsProvider): T
   }
 
   const normalized = value.trim().toLowerCase();
+  if (["0", "false", "no", "off"].includes(normalized)) {
+    return null;
+  }
   if (VALID_TTS_PROVIDERS.includes(normalized as TtsProvider)) {
     return normalized as TtsProvider;
   }
@@ -157,6 +164,23 @@ function getOptionalTtsProviderEnvVar(key: string, defaultValue: TtsProvider): T
 }
 
 const VALID_STT_REQUEST_FORMATS: SttRequestFormat[] = ["multipart", "json"];
+
+const VALID_STT_PROVIDERS: SttProvider[] = ["api", "vosk", "whisper"];
+
+function getOptionalSttProviderEnvVar(key: string, defaultValue: SttProvider): SttProvider {
+  const value = getEnvVar(key, false);
+
+  if (!value) {
+    return defaultValue;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  if (VALID_STT_PROVIDERS.includes(normalized as SttProvider)) {
+    return normalized as SttProvider;
+  }
+
+  return defaultValue;
+}
 
 function getOptionalSttRequestFormatEnvVar(
   key: string,
@@ -270,6 +294,7 @@ export const config = {
     browserRoots: getEnvVar("OPEN_BROWSER_ROOTS", false),
   },
   stt: {
+    provider: getOptionalSttProviderEnvVar("STT_PROVIDER", "api"),
     apiUrl: getEnvVar("STT_API_URL", false),
     apiKey: getEnvVar("STT_API_KEY", false),
     model: getEnvVar("STT_MODEL", false) || "whisper-large-v3-turbo",
@@ -277,7 +302,17 @@ export const config = {
     notePrompt: getEnvVar("STT_NOTE_PROMPT", false),
     // "multipart" (default) = standard OpenAI/Groq Whisper form-data upload.
     // "json" = base64 audio in an `input_audio` JSON body (e.g. OpenRouter).
+    // Only used by the "api" provider.
     requestFormat: getOptionalSttRequestFormatEnvVar("STT_REQUEST_FORMAT", "multipart"),
+  },
+  vosk: {
+    // Path to an extracted Vosk model directory, used when STT_PROVIDER=vosk.
+    modelPath: getEnvVar("VOSK_MODEL_PATH", false),
+  },
+  whisper: {
+    // transformers.js model id, used when STT_PROVIDER=whisper. Downloaded
+    // once from the Hugging Face Hub, then cached for offline use.
+    model: getEnvVar("WHISPER_MODEL", false) || "onnx-community/whisper-small",
   },
   docExtractor: {
     apiUrl: getEnvVar("DOC_EXTRACTOR_URL", false),
@@ -285,6 +320,9 @@ export const config = {
   },
   tts: (() => {
     const provider = getOptionalTtsProviderEnvVar("TTS_PROVIDER", "openai");
+    if (!provider) {
+      return { provider: null };
+    }
     const defaultVoice =
       provider === "google"
         ? "en-US-Studio-O"
@@ -293,14 +331,17 @@ export const config = {
           : provider === "edge"
             ? "en-US-EmmaMultilingualNeural"
             : "alloy";
-    const defaultModel =
-      provider === "elevenlabs" ? "eleven_flash_v2_5" : "gpt-4o-mini-tts";
+    const defaultModel = provider === "elevenlabs" ? "eleven_flash_v2_5" : "gpt-4o-mini-tts";
+    const configuredVoice = getEnvVar("TTS_VOICE", false);
     return {
       apiUrl: getEnvVar("TTS_API_URL", false),
       apiKey: getEnvVar("TTS_API_KEY", false),
       provider,
       model: getEnvVar("TTS_MODEL", false) || defaultModel,
-      voice: getEnvVar("TTS_VOICE", false) || defaultVoice,
+      voice: configuredVoice || defaultVoice,
+      // True when TTS_VOICE is set explicitly. When false, the Edge provider
+      // may pick a voice per detected language instead of using `defaultVoice`.
+      voiceIsExplicit: Boolean(configuredVoice),
     };
   })(),
 };

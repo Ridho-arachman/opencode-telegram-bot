@@ -37,6 +37,10 @@ settings.json.tmp
 .tmp/
 e2e/output/
 
+# Local STT models (large)
+vosk-model/
+*.zip
+
 # Packaging artifacts
 *.tgz
 

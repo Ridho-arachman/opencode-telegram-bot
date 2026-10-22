@@ -390,7 +390,8 @@ export const en = {
   "permission.blocked.command_not_allowed":
     "⚠️ This command is not available until you answer the permission request.",
   "permission.header": "{emoji} Permission request: {name}\n\n",
-  "permission.grouped_count": "\n⚠️ {count} identical requests pending — your answer applies to all of them.\n",
+  "permission.grouped_count":
+    "\n⚠️ {count} identical requests pending — your answer applies to all of them.\n",
   "permission.button.allow": "✅ Allow once",
   "permission.button.always": "🔓 Allow always",
   "permission.button.reject": "❌ Reject",
@@ -440,9 +441,12 @@ export const en = {
   "keyboard.variant": "💭 {name}",
   "keyboard.variant_default": "💡 Default",
   "keyboard.queued_prompt": "❌ {index}. {text}",
-  "queue.added": "📥 Added to queue ({count}/{max}). It will be sent when the current task finishes.",
-  "queue.full": "⚠️ Queue is full ({max}). Remove a message or wait for the current task to finish.",
-  "queue.media_limit": "⚠️ Queued media is limited to {maxSizeMb} MiB. Wait for an item to send, then try again.",
+  "queue.added":
+    "📥 Added to queue ({count}/{max}). It will be sent when the current task finishes.",
+  "queue.full":
+    "⚠️ Queue is full ({max}). Remove a message or wait for the current task to finish.",
+  "queue.media_limit":
+    "⚠️ Queued media is limited to {maxSizeMb} MiB. Wait for an item to send, then try again.",
   "queue.removed": "🗑 Message removed from the queue.",
   "queue.not_found": "This message is no longer in the queue.",
   "queue.steer_added": "📥 Added to the current task ({count}/{max}).",
@@ -518,8 +522,7 @@ export const en = {
     "Application is not configured yet. Starting wizard...\n",
   "runtime.wizard.tty_required":
     "Interactive wizard requires a TTY terminal. Run `opencode-telegram config` in an interactive shell.",
-  "runtime.container.command_unavailable":
-    "⚠️ This command is not available in the Docker image.",
+  "runtime.container.command_unavailable": "⚠️ This command is not available in the Docker image.",
 
   "rename.no_session": "⚠️ No active session. Create or select a session first.",
   "rename.prompt": "📝 Enter new title for session:\n\nCurrent: {title}",
@@ -657,8 +660,13 @@ export const en = {
 
   "stt.recognizing": "🎤 Recognizing audio...",
   "stt.recognized": "🎤 Recognized:",
-  "stt.not_configured":
+  "stt.not_configured": "🎤 Voice recognition is not configured.",
+  "stt.not_configured.api":
     "🎤 Voice recognition is not configured.\n\nSet STT_API_URL and STT_API_KEY in .env to enable it.",
+  "stt.not_configured.vosk":
+    "🎤 Vosk speech recognition is not configured.\n\nDownload a model from https://alphacephei.com/vosk/models, unzip it, then set VOSK_MODEL_PATH in .env.",
+  "stt.not_configured.whisper":
+    "🎤 Local Whisper is not available.\n\nRun: npm install @huggingface/transformers\n\nThe model is downloaded once on first use, then runs fully offline.",
   "stt.error": "🔴 Failed to recognize audio: {error}",
   "stt.empty_result": "🎤 No speech detected in the audio message.",
 
@@ -703,7 +711,8 @@ export const en = {
   "attachment.added": "📎 Attached: {path}\n\nSend your message and the file will go with it.",
   "attachment.cancel": "❌ Cancel attachment",
   "attachment.cancelled": "❌ Attachment cancelled",
-  "attachment.invalid": "⚠️ The attached file is no longer available. Sending the message without it.",
+  "attachment.invalid":
+    "⚠️ The attached file is no longer available. Sending the message without it.",
   "local_command.empty_output": "The command produced no output.",
   "local_command.failed": "Command failed with exit code {exitCode}: {stderr}",
   "local_command.timeout": "The command timed out.",

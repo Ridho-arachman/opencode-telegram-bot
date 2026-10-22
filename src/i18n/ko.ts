@@ -669,6 +669,12 @@ export const ko: I18nDictionary = {
   "stt.recognized": "🎤 인식 결과:",
   "stt.not_configured":
     "🎤 음성 인식이 설정되지 않았습니다.\n\n사용하려면 .env에 STT_API_URL과 STT_API_KEY를 설정해 주세요.",
+  "stt.not_configured.api":
+    "🎤 Voice recognition is not configured.\n\n사용하려면 .env에 STT_API_URL과 STT_API_KEY를 설정해 주세요.",
+  "stt.not_configured.vosk":
+    "🎤 Vosk 음성 인식이 설정되지 않았습니다.\n\nhttps://alphacephei.com/vosk/models에서 모델을 다운로드하고 압축을 해제한 뒤 .env에 VOSK_MODEL_PATH를 설정해 주세요.",
+  "stt.not_configured.whisper":
+    "🎤 로컬 Whisper를 사용할 수 없습니다.\n\n실행: npm install @huggingface/transformers\n\n모델은 첫 사용 시 한 번 다운로드되며 이후 완전히 오프라인으로 동작합니다.",
   "stt.error": "🔴 오디오 인식에 실패했습니다: {error}",
   "stt.empty_result": "🎤 오디오 메시지에서 음성을 감지하지 못했습니다.",
 

@@ -68,6 +68,11 @@
     "unified": "^11.0.5",
     "ws": "^8.21.1"
   },
+  "optionalDependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@huggingface/transformers": "^3.7.6",
+    "vosk": "^0.3.39"
+  },
   "overrides": {
     "google-gax": {
       "rimraf": "^6.1.3"

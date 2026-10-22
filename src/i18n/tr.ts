@@ -664,6 +664,12 @@ export const tr: I18nDictionary = {
   "stt.recognized": "🎤 Tanınan:",
   "stt.not_configured":
     "🎤 Ses tanıma yapılandırılmamış.\n\nEtkinleştirmek için .env içinde STT_API_URL ve STT_API_KEY ayarlayın.",
+  "stt.not_configured.api":
+    "🎤 Voice recognition is not configured.\n\nEtkinleştirmek için .env içinde STT_API_URL ve STT_API_KEY ayarlayın.",
+  "stt.not_configured.vosk":
+    "🎤 Vosk ses tanıma yapılandırılmamış.\n\nhttps://alphacephei.com/vosk/models adresinden bir model indirin, çıkarın ve .env içinde VOSK_MODEL_PATH ayarlayın.",
+  "stt.not_configured.whisper":
+    "🎤 Yerel Whisper kullanılamıyor.\n\nÇalıştırın: npm install @huggingface/transformers\n\nModel ilk kullanımda bir kez indirilir, ardından tamamen çevrimdışı çalışır.",
   "stt.error": "🔴 Ses tanınamadı: {error}",
   "stt.empty_result": "🎤 Ses mesajında konuşma algılanmadı.",
 

@@ -18,6 +18,7 @@ const BASE_URL = "speech.platform.bing.com/consumer/speech/synthesize/readaloud"
 const TRUSTED_CLIENT_TOKEN = "6A5AA1D4EAFF4E9FB37E23D68491D6F4";
 const WSS_URL = `wss://${BASE_URL}/edge/v1?TrustedClientToken=${TRUSTED_CLIENT_TOKEN}`;
 
+// Updated to match edge-tts-universal (emulates Chrome/Edge 143)
 const CHROMIUM_FULL_VERSION = "143.0.3650.75";
 const CHROMIUM_MAJOR_VERSION = CHROMIUM_FULL_VERSION.split(".")[0];
 export const SEC_MS_GEC_VERSION = `1-${CHROMIUM_FULL_VERSION}`;
@@ -28,16 +29,24 @@ const WIN_EPOCH_SECONDS = 11644473600;
 const TICKS_PER_SECOND = 10_000_000;
 const ROUND_SECONDS = 300;
 
-const WSS_HEADERS: Record<string, string> = {
-  Pragma: "no-cache",
-  "Cache-Control": "no-cache",
-  Origin: "chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold",
+const BASE_HEADERS: Record<string, string> = {
   "User-Agent":
     `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ` +
     `(KHTML, like Gecko) Chrome/${CHROMIUM_MAJOR_VERSION}.0.0.0 Safari/537.36 ` +
     `Edg/${CHROMIUM_MAJOR_VERSION}.0.0.0`,
   "Accept-Encoding": "gzip, deflate, br, zstd",
   "Accept-Language": "en-US,en;q=0.9",
+  "sec-ch-ua": `"Microsoft Edge";v="143", "Chromium";v="143", "Not=A?Brand";v="24"`,
+  "sec-ch-ua-mobile": "?0",
+  "sec-ch-ua-platform": `"Windows"`,
+};
+
+const WSS_HEADERS: Record<string, string> = {
+  ...BASE_HEADERS,
+  Pragma: "no-cache",
+  "Cache-Control": "no-cache",
+  Origin: "chrome-extension://jdiccldimpdaibmpdkjnbmckianbfold",
+  "Sec-WebSocket-Version": "13",
 };
 
 const SYNTHESIS_TIMEOUT_MS = 60_000;

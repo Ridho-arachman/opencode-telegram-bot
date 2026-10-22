@@ -177,13 +177,11 @@ describe("bot/handlers/voice-handler", () => {
     mocked.getPromptQueueModeMock.mockReturnValue("queue");
     const { handleVoiceMessage } = await loadVoiceModule();
     const { promptQueue } = await import("../../../src/app/managers/prompt-queue-manager.js");
-    const { initializePromptQueueDispatch } = await import(
-      "../../../src/bot/handlers/prompt-queue-dispatch.js"
-    );
+    const { initializePromptQueueDispatch } =
+      await import("../../../src/bot/handlers/prompt-queue-dispatch.js");
     // The module graph was reset above, so the container has to come from it as well.
-    const { createTestAppContainer: createFreshTestAppContainer } = await import(
-      "../../helpers/app-container.js"
-    );
+    const { createTestAppContainer: createFreshTestAppContainer } =
+      await import("../../helpers/app-container.js");
     const container = createFreshTestAppContainer();
     promptQueue.__resetForTests();
     container.foregroundSessionState.markBusy("session-1", "/repo");
@@ -231,7 +229,7 @@ describe("bot/handlers/voice-handler", () => {
 
     await handleVoiceMessage(ctx, deps);
 
-    expect(replyMock).toHaveBeenCalledWith(t("stt.not_configured"));
+    expect(replyMock).toHaveBeenCalledWith(t("stt.not_configured.api"));
     expect(downloadMock).not.toHaveBeenCalled();
     expect(processPromptMock).not.toHaveBeenCalled();
   });

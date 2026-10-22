@@ -683,6 +683,12 @@ export const pt: I18nDictionary = {
   "stt.recognized": "🎤 Reconhecido:",
   "stt.not_configured":
     "🎤 O reconhecimento de voz não está configurado.\n\nDefina STT_API_URL e STT_API_KEY no .env para ativá-lo.",
+  "stt.not_configured.api":
+    "🎤 Voice recognition is not configured.\n\nDefina STT_API_URL e STT_API_KEY no .env para ativá-lo.",
+  "stt.not_configured.vosk":
+    "🎤 O reconhecimento de voz com Vosk não está configurado.\n\nBaixe um modelo em https://alphacephei.com/vosk/models, descompacte-o e defina VOSK_MODEL_PATH no .env.",
+  "stt.not_configured.whisper":
+    "🎤 O Whisper local não está disponível.\n\nExecute: npm install @huggingface/transformers\n\nO modelo é baixado uma vez e depois funciona totalmente offline.",
   "stt.error": "🔴 Não foi possível reconhecer o áudio: {error}",
   "stt.empty_result": "🎤 Nenhuma fala detectada na mensagem de áudio.",
 
